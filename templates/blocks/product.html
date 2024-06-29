@@ -1,0 +1,89 @@
+{% load static %}
+{% load custom_filters %}
+
+
+<div class="product__item{% if product.discount_price %} sale{% endif %}">
+                        
+    {% if product.product_type == 1 and product.image %}
+        <div class="product__item__pic set-bg" data-setbg="{{product.image.url}}">                                      
+    {% elif product.product_type == 2 and product.default_color_first_img_url%}
+        <div class="product__item__pic active" id={{ product.uid }} style= "background-image: url('{{ product.default_color_first_img_url }}');" >
+    {% else %}
+        <div class="product__item__pic set-bg" data-setbg="{% static 'img/dummy.jpg' %}">
+    {% endif %}
+
+    {% if product.discount_price %}
+        <span class="label">Sale</span>
+    {% endif %}
+    
+    <!-- hover icons -->
+    <ul class="product__hover">
+        {% if request.user.is_authenticated %}
+            {% if product|in_wishlist:request.user %}
+                <li id='wish' value="{{ product.uid }}">
+                    <img src="{% static 'img/icon/heart-filled.png' %}">
+                </li>
+            {% else %}
+                <li id='wish' value="{{ product.uid }}">
+                    <img src="{% static 'img/icon/heart.png' %}">
+                </li>
+            {% endif %}
+        {% endif %}
+        <li><a href="{% url 'products' product_slug=product.slug %}"><img src="{% static 'img/icon/search.png' %}" alt=""></a></li>
+    </ul>
+</div>
+
+<div class="product__item__text" id= "{{ "text_"|concat:product.uid }}">
+    <h6>{{product.product_name}}</h6>
+    {% if product.in_stock %}
+        {% if not product.default_color and not product.default_size %}
+            <button class="btn btn-link add-cart" value="{{product.uid}}" href="#">+ Add To Cart</button>
+        {% else %}
+            <button class="btn btn-link add-cart" href="{% url 'products' product_slug=product.slug %}" data-toggle="popover" data-content="Select Options" data-placement="right">+ Add To Cart</button>
+        {% endif %}
+    {% else %}
+    <p class='m-0' style='color:red'>*Not in stock</p>
+
+    {% endif %}
+
+    <!-- rating -->
+    {% if product.avgRating %}
+        <div class="rating">
+        {% with ''|center:5 as range %}
+            {% for i in range %}
+                {% if forloop.counter <= product.avgRating %}
+                    <i class="fa fa-star"></i>
+                {% else %}
+                    <i class="fa fa-star-o" style="color: #b7b7b7"></i>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+        </div>
+    {% else %}
+        <div class= 'rating'>
+            <small>No Reviews yet</small>
+        </div>
+    {% endif %}
+
+    <!--discount-->
+    {% if product.discount_price %}
+        <h5><del class= 'text-muted'>₹{{product.finalPrice}}</del> ₹{{product.finalDiscountPrice}}</h5>
+    {% else %}
+        <h5>₹{{product.finalPrice}}</h5>
+    {% endif %}
+    
+    <!-- color -->
+    {% if product.default_color %}
+        <div class="color_select">
+            {% for child in product.color_variant.all %}
+            {% if child.in_stock %}
+            <span style="background: {{child.color_variant.color}};" value="{{ product.uid }}"
+            {% if product.default_color.uid == child.color_variant.uid %} class="active"{% endif %}
+            data-color="{{child.color_variant.color}}" data-pic="url({{child.color_images.last.image.url}})"></span>
+            {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+</div>

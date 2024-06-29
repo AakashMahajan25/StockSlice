@@ -1,0 +1,24 @@
+body{
+    background-color: #131722;
+    color:white;
+}
+
+.content{
+    height: 91vh;
+    max-width: 100vw;
+}
+
+.header__nav{
+    height: 50px;
+    margin-left: 1rem
+}
+
+.profile-dropdown:hover.dropdown-menu{
+    display: block;
+}
+
+.chart-container{
+    border: 1px solid #595c64;
+    margin-left: 1rem;
+    border-radius: 0.5rem;
+}

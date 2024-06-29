@@ -1,0 +1,24 @@
+{% extends './base.html' %}
+
+
+{% load static %}
+
+{% block body %}
+  
+  {% include 'blocks/breadcrumb.html' %}
+
+  <!-- content -->
+  <section class="container-fluid pt-0 pb-2">
+    {% block content %}{% endblock content %}
+  </section>
+  {% if data.image %}
+    <div class="container pb-5">
+      {% if data.subhead %}
+      <h1 class="text-center title-img" style= "font-size:1.3rem">{{data.subhead}}</h1>
+      {% endif %}
+      <div style="text-align: justify">
+        {{data.body|safe}}
+      </div>
+    </div>
+    {% endif %}
+  {% endblock body %}

@@ -1,0 +1,23 @@
+  <!-- Breadcrumb Section Begin -->
+  <section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>{{data.name}}</h4>
+                    <div class="breadcrumb__links">
+                      <a href="{% url 'home' %}">Home</a>
+                      {% for crumb in breadcrumb %}
+                        {% if forloop.last %}
+                        <span>{{crumb.name}}</span>  
+                        {% else %}
+                          <a href="{{crumb.url}}">{{crumb.name}}</a>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+<!-- Breadcrumb Section End -->

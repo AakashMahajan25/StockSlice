@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block body %}
+
+<div clas='container'>
+  <div class='row content'>
+    <div class="col-lg-10">
+      <div class="chart-container">{{ chart_html|safe }}</div>
+    </div>
+    <div class='col-lg-2'>
+      <div class="d-flex align-items-baseline">
+        <h2>{{latest_price}}</h2><small style="padding-left: 0.25rem;">INR</small>
+      </div>
+      <button type="button" class="btn btn-success">Buy</button>
+      <button type="button" class="btn btn-danger">Sell</button>
+    </div>
+  </div>
+</div>
+
+{% endblock body %}

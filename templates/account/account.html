@@ -1,0 +1,300 @@
+{% extends 'base/sub-page.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+  <div class="avatar-upload">
+      <div class="avatar-edit">
+          <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" />
+          <label for="imageUpload"></label>
+      </div>
+      <div class="avatar-preview">
+          <div id="imagePreview" style="background-image: url('{% if profile.profile_image %}{{ profile.profile_image.url }}{% else %}{% static 'img/dummy_user.jpg' %}{% endif %}');">
+          </div>            
+          <h3 class='text-center pt-3 text-uppercase'>{{ request.user.username }}</h3>
+      </div>
+  </div>
+</div>
+<div class='container-fluid'>
+  <div class="d-flex justify-content-center my-4 flex-wrap">
+    <div class="box mr-4 my-1 bg-light">
+      <i class="fa fa-truck fa-2x"></i>
+        <div class="d-flex align-items-center mt-2">
+            <div class="tag">Orders placed</div>
+            <div class="ml-auto number">{{orders|length}}</div>
+        </div>
+    </div>
+    <div class="box mr-4 my-1 bg-light">
+      <i class="fa fa-shopping-cart fa-2x"></i>
+        <div class="d-flex align-items-center mt-2">
+            <div class="tag">Items in Cart</div>
+            <div class="ml-auto number">{{cart.cart_count}}</div>
+        </div>
+    </div>
+    <div class="box mr-4 my-1 bg-light">
+      <i class="fa fa-heart fa-2x"></i>
+        <div class="d-flex align-items-center mt-2">
+            <div class="tag">Wishlist</div>
+            <div class="ml-auto number">{{WLCount}}</div>
+        </div>
+    </div>
+  </div>
+</div>
+{% for order in orders %}
+{% if order.order_status != '5' %}
+<div class = 'py-2'>
+  <div class="container order bg-light" style= 'border-radius:15px'>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="d-flex flex-column justify-content-center h-100">
+                <h5 class="text-uppercase"># {{forloop.counter}} Order</h5>
+                <div class="d-flex" style= 'align-items: flex-end;'>
+                <h3>₹ {{ order.cart.cart_total }}</h3> &nbsp; <h6>{{ order.created_at }}</h6>
+                </div>              
+                <small class='text-muted'>#{{ order.uid }}</small>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="d-sm-flex align-items-sm-start justify-content-sm-between">
+                <div class="status">Status : {{ order.get_order_status_display }}</div>
+                <div class="btn btn-primary text-uppercase">order info</div>
+            </div>
+            <div class="progressbar-track">
+                <ul class="progressbar">
+                    <li id="step-1" class="text-muted green">
+                        <span class="fa fa-gift"></span>
+                    </li>
+                    <li id="step-2" class="text-muted green">
+                        <span class="fa fa-check"></span>
+                    </li>
+                    <li id="step-3" class="text-muted green">
+                        <span class="fas fa-box"></span>
+                    </li>
+                    <li id="step-4" class="text-muted green">
+                        <span class="fa fa-truck"></span>
+                    </li>
+                    <li id="step-5" class="text-muted green">
+                        <span class="fas fa-box-open"></span>
+                    </li>
+                </ul>
+                <div id="tracker"></div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endfor %}
+
+<div class="container">
+  <div class="container-fluid">
+      <h3>Order History</h3>
+      <table class="table">
+      <thead>
+          <tr>
+          <th>No.</th>
+          <th>Order #</th>
+          <th>Order Date</th>
+          <th>Total</th>
+          <th>Info</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for order in orders %}
+          {% if order.order_status == '5' %}
+          <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ order.uid }}</td>
+          <td>{{ order.created_at }}</td>
+          <td>{{ order.cart.cart_total }}</td>
+          <td><a href="#">View</a></td>
+          </tr>
+          {% endif %}
+
+          {% empty %}
+          <tr>
+          <td colspan="5">No orders found.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+      </table>
+  </div>
+</div>
+
+{% endblock %}
+{% block extraJS %}
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+function readURL(input) {
+  if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+          $('#imagePreview').css('background-image', 'url('+e.target.result +')');
+          $('#imagePreview').hide();
+          $('#imagePreview').fadeIn(650);
+          
+          var formData = new FormData();
+          formData.append('profile_image', input.files[0]);
+          
+          $.ajax({
+              url: '{% url 'upload_dp' %}',
+              type: 'POST',
+              headers: {'X-CSRFToken': csrftoken},
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function(response) {
+                  console.log(response);
+              },
+              error: function(xhr, status, error) {
+                  console.log(xhr.responseText);
+              }
+          });
+      }
+      reader.readAsDataURL(input.files[0]);
+  }
+}
+
+$("#imageUpload").change(function() {
+  readURL(this);
+});
+</script>
+{% endblock extraJS %}
+
+{% block extraCSS %}
+<link href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' rel='stylesheet'>
+<style>
+  
+#step-1::after {
+  content: 'Placed';
+}
+
+#step-2::after {
+  content: 'Accepted';
+  left: -10px;
+}
+
+#step-3::after {
+  content: 'Packed';
+}
+
+#step-4::after {
+  content: 'Shipped';
+}
+
+#step-5::after {
+  content: 'Delivered';
+  left: -10px;
+}
+
+.order .progressbar-track .progressbar li::after {
+  position: absolute;
+  font-size: 0.9rem;
+  top: 50px;
+  left: 0px;
+}
+
+.box {
+  padding: 10px;
+  border-radius: 6px;
+  width: 170px;
+  height: 90px;
+}
+.box img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+.box .tag {
+    font-size: 0.9rem;
+    color: #000;
+    font-weight: 500;
+}
+.box .number {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.order {
+  padding: 10px 30px;
+  min-height: 150px;
+}
+order .order-summary {
+  height: 100%;
+}
+.order .green-label {
+  background-color: #a8e9d0;
+  color: #008357;
+  font-size: 0.9rem;
+  padding: 0px 3px;
+}
+.order .fs-8 {
+  font-size: 0.85rem;
+}
+.order .rating img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+.order .progressbar-track {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.order .progressbar-track .progressbar {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0rem;
+}
+.order .progressbar-track .progressbar li.green {
+  border: 1px solid #007965;
+  background-color: #d5e6e2;
+}
+.order .progressbar-track .progressbar li {
+  font-size: 1.5rem;
+  border: 1px solid #333;
+  padding: 5px 10px;
+  border-radius: 50%;
+  background-color: #dddddd;
+  z-index: 100;
+  position: relative;
+}
+.green {
+  color: #007965 !important;
+}
+#tracker {
+  position: absolute;
+  border-top: 1px solid #bbb;
+  width: 100%;
+  top: 25px;
+}
+.order .status {
+  font-weight: 600;
+}
+.order .btn.btn-primary {
+  background-color: #fff;
+  color: #4e2296;
+  border: 1px solid #4e2296;
+}
+.order .rating .fas{
+color: #daa520;
+}
+</style>
+{% endblock extraCSS %}
